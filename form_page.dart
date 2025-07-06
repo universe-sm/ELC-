@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'submitted.dart';
+
+void main() => runApp(MyFormInImageApp());
 
 class MyFormInImageApp extends StatelessWidget {
   @override
@@ -22,15 +25,10 @@ class MyFormInImageApp extends StatelessWidget {
                 top: 205,
                 child: Container(
                   width: 320,
-                  height: 320,
+                  height: 400,
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(
-                      255,
-                      243,
-                      177,
-                      177,
-                    ).withOpacity(0.05),
+                    color: const Color.fromARGB(255, 243, 177, 177).withOpacity(0.05),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: UserForm(),
@@ -50,7 +48,7 @@ class UserForm extends StatefulWidget {
 }
 
 class _UserFormState extends State<UserForm> {
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _email = TextEditingController();
@@ -59,23 +57,40 @@ class _UserFormState extends State<UserForm> {
   DateTime? _dob;
   String? _gender;
   String? _bloodGroup;
+  Map<String, String>? _submittedData;
 
-  final List<String> _bloodGroups = [
-    'A+',
-    'A-',
-    'B+',
-    'B-',
-    'AB+',
-    'AB-',
-    'O+',
-    'O-',
-  ];
+  final List<String> _bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Form submitted!')));
+      setState(() {
+        _submittedData = {
+          'Name': _name.text,
+          'Email': _email.text,
+          'Password': _password.text,
+          'Mobile': _mobile.text,
+          'DOB': _dob != null ? DateFormat('dd-MM-yyyy').format(_dob!) : '',
+          'Gender': _gender ?? '',
+          'Blood Group': _bloodGroup ?? '',
+        };
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Form submitted successfully!',
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: const Color.fromARGB(255, 17, 87, 1),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        ),
+      );
     }
   }
 
@@ -85,6 +100,24 @@ class _UserFormState extends State<UserForm> {
       initialDate: DateTime(2000),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.red,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.pink.shade50,
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -113,36 +146,24 @@ class _UserFormState extends State<UserForm> {
           ),
         ),
         SizedBox(height: 10),
-
-        // Scrollable form fields (only 3 visible at a time)
         Theme(
           data: Theme.of(context).copyWith(
             scrollbarTheme: ScrollbarThemeData(
-              thumbColor: MaterialStateProperty.all<Color>(
-                Colors.red,
-              ), // scrollbar thumb color
-              trackColor: MaterialStateProperty.all<Color>(
-                Colors.grey.shade300,
-              ), // optional track color
-              thickness: MaterialStateProperty.all<double>(
-                6,
-              ), // width of the scrollbar
+              thumbColor: MaterialStateProperty.all<Color>(Colors.red),
+              trackColor: MaterialStateProperty.all<Color>(Colors.grey.shade300),
+              thickness: MaterialStateProperty.all<double>(6),
               radius: Radius.circular(6),
             ),
           ),
-
           child: Container(
-            height: 180, // shows approx. 3 fields
+            height: 180,
             child: Scrollbar(
               controller: _scrollController,
               thickness: 8,
               radius: Radius.circular(4),
-              scrollbarOrientation:
-                  ScrollbarOrientation.right, // ensures it's on the right edge
+              scrollbarOrientation: ScrollbarOrientation.right,
               child: Padding(
-                padding: const EdgeInsets.only(
-                  right: 0,
-                ), // remove inner padding if any
+                padding: const EdgeInsets.only(right: 0),
                 child: SingleChildScrollView(
                   controller: _scrollController,
                   padding: const EdgeInsets.only(right: 15.0),
@@ -154,32 +175,25 @@ class _UserFormState extends State<UserForm> {
                         field(
                           controller: _name,
                           label: 'Name',
-                          validator: (val) =>
-                              val == null || val.isEmpty ? 'Enter name' : null,
+                          validator: (val) => val == null || val.isEmpty ? 'Enter name' : null,
                         ),
                         field(
                           controller: _email,
                           label: 'Email',
                           keyboardType: TextInputType.emailAddress,
-                          validator: (val) => val == null || !val.contains('@')
-                              ? 'Enter valid email'
-                              : null,
+                          validator: (val) => val == null || !val.contains('@') ? 'Enter valid email' : null,
                         ),
                         field(
                           controller: _password,
                           label: 'Password',
                           obscureText: true,
-                          validator: (val) => val == null || val.length < 6
-                              ? 'Min 6 characters'
-                              : null,
+                          validator: (val) => val == null || val.length < 6 ? 'Min 6 characters' : null,
                         ),
                         field(
                           controller: _mobile,
                           label: 'Mobile Number',
                           keyboardType: TextInputType.phone,
-                          validator: (val) => val == null || val.length != 10
-                              ? 'Enter 10-digit number'
-                              : null,
+                          validator: (val) => val == null || val.length != 10 ? 'Enter 10-digit number' : null,
                         ),
                         GestureDetector(
                           onTap: _pickDate,
@@ -191,9 +205,8 @@ class _UserFormState extends State<UserForm> {
                                     : DateFormat('dd-MM-yyyy').format(_dob!),
                               ),
                               label: 'Date of Birth',
-                              validator: (val) => val == null || val.isEmpty
-                                  ? 'Select date'
-                                  : null,
+                              validator: (val) =>
+                                  val == null || val.isEmpty ? 'Select date' : null,
                             ),
                           ),
                         ),
@@ -206,18 +219,14 @@ class _UserFormState extends State<UserForm> {
                           ),
                           value: _gender,
                           items: ['Male', 'Female', 'Other']
-                              .map(
-                                (g) =>
-                                    DropdownMenuItem(value: g, child: Text(g)),
-                              )
+                              .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                               .toList(),
                           onChanged: (val) {
                             setState(() {
                               _gender = val;
                             });
                           },
-                          validator: (val) =>
-                              val == null ? 'Select gender' : null,
+                          validator: (val) => val == null ? 'Select gender' : null,
                         ),
                         SizedBox(height: 10),
                         DropdownButtonFormField<String>(
@@ -250,10 +259,7 @@ class _UserFormState extends State<UserForm> {
             ),
           ),
         ),
-
         SizedBox(height: 10),
-
-        // Submit button outside scroll
         ElevatedButton(
           onPressed: _submit,
           style: ElevatedButton.styleFrom(
@@ -262,6 +268,23 @@ class _UserFormState extends State<UserForm> {
           ),
           child: Text('Submit'),
         ),
+        SizedBox(height: 8),
+        if (_submittedData != null)
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SubmittedDataPage(data: _submittedData!),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 249, 231, 231),
+              foregroundColor: const Color.fromARGB(255, 255, 0, 0),
+            ),
+            child: Text('View Submitted Data'),
+          ),
       ],
     );
   }
