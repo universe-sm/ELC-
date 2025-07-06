@@ -21,8 +21,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/hand.png
     - assets/6.jpg
     - assets/2.png
+    - assets/8.jpg
+    - assets/9.jpg
+    - assets/10.jpg
+
 
 
