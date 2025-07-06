@@ -8,7 +8,7 @@ class BloodApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: HomePage(), // You were missing this in your main app!
     );
   }
 }
@@ -22,30 +22,41 @@ class HomePage extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Centered image
+            // Background image
             Image.asset(
-              'assets/hand.png',
+              'assets/8.jpg',
               width: 430,
-              height:700,
+              height: 700,
               fit: BoxFit.fill,
             ),
 
-            // Play button inside the image, positioned to the right
+            // Register button at the bottom of the image
             Positioned(
-              right:65,
-              child: IconButton(
-                icon: Icon(
-                  Icons.play_circle_fill,
-                  color: Colors.red,
-                  size: 64,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProcessingPage()),
-                  );
-                },
-              ),
+              bottom:70,
+              child: ElevatedButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProcessingPage()),
+    );
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color.fromARGB(255, 247, 1, 1), // bright red
+    foregroundColor: Colors.white, // text color
+    padding: EdgeInsets.symmetric(horizontal:45, vertical: 22),
+    shape: RoundedRectangleBorder(
+  borderRadius: BorderRadius.circular(20), // Try 30 to 50 for pill shape
+),// pill-shaped
+    elevation: 6, // shadow
+    textStyle: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 20,
+      letterSpacing: 1,
+    ),
+  ),
+  child: Text('REGISTER'),
+)
+
             ),
           ],
         ),
