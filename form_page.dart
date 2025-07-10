@@ -340,7 +340,7 @@ Future<void> submitData({
   required String gender,
   required String bloodGroup,
 }) async {
-  const String url = 'https://your-server.com/submit.php'; // Replace with your actual backend URL
+  const String url = 'http://elcapp.42web.io/save_data.php'; // Replace with your actual backend URL
 
   try {
     final response = await http.post(
