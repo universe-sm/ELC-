@@ -1,11 +1,49 @@
 import 'package:bloodapp/main.dart';
-import 'package:flutter/material.dart';
 import 'main.dart'; // Make sure this is your actual home page file
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class SubmittedDataPage extends StatelessWidget {
-  final Map<String, String> data;
+class SubmittedDataPage extends StatefulWidget {
+  @override
+  _SubmittedDataPageState createState() => _SubmittedDataPageState();
+}
 
-  const SubmittedDataPage({required this.data});
+class _SubmittedDataPageState extends State<SubmittedDataPage> {
+  List<dynamic> submittedData = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSubmittedData();
+  }
+
+  Future<void> fetchSubmittedData() async {
+    final url = Uri.parse('http://192.168.104.45/backend/get_data.php'); // Replace with your actual IP and backend folder path
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          submittedData = data;
+          isLoading = false;
+        });
+      } else {
+        print("Failed to fetch data");
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,105 +53,51 @@ class SubmittedDataPage extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Background Image
             Image.asset(
               'assets/10.jpg',
               width: 430,
               height: 700,
               fit: BoxFit.fill,
             ),
-
-            // Foreground Data Card
             Container(
               width: 320,
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
+                color: Colors.white.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.black, width: 2),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Title
-                  Text(
-                    'Submitted Details',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                      color: Colors.black,
-                    ),
-                  ),
-                  SizedBox(height: 15),
-
-                  // Profile Icon
-                 // Profile Icon with Red Border
-Container(
-  padding: EdgeInsets.all(4), // Space for the border
-  decoration: BoxDecoration(
-    shape: BoxShape.circle,
-    border: Border.all(color: Colors.red, width: 3), // Border color and width
-  ),
-  child: CircleAvatar(
-    radius: 35,
-    backgroundColor: Colors.black,
-    child: Icon(Icons.person, size: 35, color: Colors.white),
-  ),
-),
-
-
-                  // Submitted Data
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: data.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${entry.key}: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                entry.value,
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : submittedData.isEmpty
+                      ? Center(child: Text("No submissions found!"))
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: submittedData.length,
+                          itemBuilder: (context, index) {
+                            final item = submittedData[index];
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Name: ${item['name']}',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black),
+                                ),
+                                Text(
+                                  'Email: ${item['email']}',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                Text(
+                                  'Age: ${item['age']}',
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                                Divider(color: Colors.black),
+                              ],
+                            );
+                          },
                         ),
-                      );
-                    }).toList(),
-                  ),
-
-                  SizedBox(height: 25),
-
-                  // Back to Home Button
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => BloodApp()),
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Icon(Icons.arrow_back, size: 30, color: Colors.black),
-                        SizedBox(height: 5),
-                        Text(
-                          'Back to home',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
