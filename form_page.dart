@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'submitted.dart';
+import 'package:http/http.dart' as http;
+
 
 void main() => runApp(MyFormInImageApp());
 
@@ -61,38 +63,53 @@ class _UserFormState extends State<UserForm> {
 
   final List<String> _bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _submittedData = {
-          'Name': _name.text,
-          'Email': _email.text,
-          'Password': _password.text,
-          'Mobile': _mobile.text,
-          'DOB': _dob != null ? DateFormat('dd-MM-yyyy').format(_dob!) : '',
-          'Gender': _gender ?? '',
-          'Blood Group': _bloodGroup ?? '',
-        };
-      });
+  void _submit() async {
+  if (_formKey.currentState!.validate()) {
+    final formattedDob = _dob != null ? DateFormat('dd-MM-yyyy').format(_dob!) : '';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Form submitted successfully!',
-            style: TextStyle(color: Colors.black),
-          ),
-          backgroundColor: const Color.fromARGB(255, 17, 87, 1),
-          duration: Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    setState(() {
+      _submittedData = {
+        'Name': _name.text,
+        'Email': _email.text,
+        'Password': _password.text,
+        'Mobile': _mobile.text,
+        'DOB': formattedDob,
+        'Gender': _gender ?? '',
+        'Blood Group': _bloodGroup ?? '',
+      };
+    });
+
+    // Call the submitData function
+    await submitData(
+      name: _name.text,
+      email: _email.text,
+      password: _password.text,
+      phone: _mobile.text,
+      dob: formattedDob,
+      gender: _gender ?? '',
+      bloodGroup: _bloodGroup ?? '',
+    );
+
+    // Show the Snackbar only once
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Form submitted successfully!',
+          style: TextStyle(color: Colors.black),
         ),
-      );
-    }
+        backgroundColor: const Color.fromARGB(255, 17, 87, 1),
+        duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      ),
+    );
   }
+}
+
 
   void _pickDate() async {
     DateTime? picked = await showDatePicker(
@@ -275,7 +292,7 @@ class _UserFormState extends State<UserForm> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SubmittedDataPage(data: _submittedData!),
+                  builder: (context) => SubmittedDataPage(),
                 ),
               );
             },
@@ -311,5 +328,46 @@ class _UserFormState extends State<UserForm> {
         validator: validator,
       ),
     );
+  }
+}
+
+Future<void> submitData({
+  required String name,
+  required String email,
+  required String password,
+  required String phone,
+  required String dob,
+  required String gender,
+  required String bloodGroup,
+}) async {
+  const String url = 'https://your-server.com/submit.php'; // Replace with your actual backend URL
+
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'name': name,
+        'email': email,
+        'password': password,
+        'phone': phone,
+        'dob': dob,
+        'gender': gender,
+        'blood_group': bloodGroup,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      if (response.body.trim() == 'success') {
+        print('Data submitted successfully');
+        // You can show a Snackbar or navigate to another page
+      } else {
+        print('Server error: ${response.body}');
+      }
+    } else {
+      print('Failed with status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error occurred: $e');
   }
 }
