@@ -366,7 +366,7 @@ Future<void> submitData({
         logger.e('Data submitted successfully');
         // You can show a Snackbar or navigate to another page
       } else {
-        logger.e('Server error: ${response.body}');
+        logger.i('Server response: ${response.body}');
       }
     } else {
       logger.e('Failed with status code: ${response.statusCode}');
