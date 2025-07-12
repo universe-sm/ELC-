@@ -1,15 +1,17 @@
-import 'package:bloodapp/main.dart';
-import 'main.dart'; // Make sure this is your actual home page file
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
+final logger = Logger();
 
 class SubmittedDataPage extends StatefulWidget {
+  const SubmittedDataPage({super.key});
   @override
-  _SubmittedDataPageState createState() => _SubmittedDataPageState();
+  SubmittedDataPageState createState() => SubmittedDataPageState();
 }
 
-class _SubmittedDataPageState extends State<SubmittedDataPage> {
+class SubmittedDataPageState extends State<SubmittedDataPage> {
   List<dynamic> submittedData = [];
   bool isLoading = true;
 
@@ -20,7 +22,7 @@ class _SubmittedDataPageState extends State<SubmittedDataPage> {
   }
 
   Future<void> fetchSubmittedData() async {
-    final url = Uri.parse('http://192.168.104.45/backend/get_data.php'); // Replace with your actual IP and backend folder path
+    final url = Uri.parse('https://api.allorigins.win/raw?url=https://elcapp.42web.io/get_data.php'); // Replace with your actual IP and backend folder path
 
     try {
       final response = await http.get(url);
@@ -32,13 +34,13 @@ class _SubmittedDataPageState extends State<SubmittedDataPage> {
           isLoading = false;
         });
       } else {
-        print("Failed to fetch data");
+        logger.e("Failed to fetch data");
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      print("Error: $e");
+      logger.e("Error: $e");
       setState(() {
         isLoading = false;
       });
@@ -63,7 +65,7 @@ class _SubmittedDataPageState extends State<SubmittedDataPage> {
               width: 320,
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+               color: Colors.white.withAlpha(13),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.black, width: 2),
               ),
